@@ -21,6 +21,9 @@ def main():
     conversational_memory_length = st.sidebar.slider('Longitud de la memoria conversacional:', 1, 10, value=5)
     memory = ConversationBufferWindowMemory(k=conversational_memory_length, memory_key="chat_history", return_messages=True)
 
+    # Opción para seleccionar el modo de consulta (información o quiz)
+    mode = st.sidebar.selectbox("Selecciona el tipo de consulta", ["Información sobre medicamento", "Generar Quiz"])
+
     user_question = st.text_input("Escribe tu consulta médica:")
     image_file = st.file_uploader("Sube una imagen de un medicamento", type=["jpg", "jpeg", "png"])
 
@@ -54,10 +57,15 @@ def main():
             st.image(image_file, caption='Imagen del medicamento subido', use_column_width=True)
 
             # Supón que se extrae el nombre del medicamento de la imagen
-            medication_name = "ceterizine"  # Este sería el resultado del análisis de imagen
+            medication_name = "Paracetamol"  # Este sería el resultado del análisis de imagen
 
-            # Generar la respuesta usando LangChain y Groq
-            response = conversation.predict(human_input=f"Cuáles son las características, usos y contraindicaciones del medicamento {medication_name}?")
+            # Lógica para generar información o quiz
+            if mode == "Información sobre medicamento":
+                # Generar la respuesta usando LangChain y Groq para información del medicamento
+                response = conversation.predict(human_input=f"Cuáles son las características, usos y contraindicaciones del medicamento {medication_name}?")
+            else:
+                # Generar preguntas tipo quiz usando LangChain y Groq
+                response = conversation.predict(human_input=f"Genera 3 preguntas tipo quiz sobre el medicamento {medication_name} para estudiantes de medicina o farmacia.")
         else:
             # Si solo hay consulta en texto
             response = conversation.predict(human_input=user_question)
